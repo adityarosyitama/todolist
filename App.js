@@ -23,6 +23,9 @@ import moment from 'moment/moment';
 import {useDispatch, useSelector} from 'react-redux';
 import {Calendar} from 'react-native-calendars';
 import DateTimePicker from 'react-native-modal-datetime-picker';
+import {Alert} from 'react-native';
+import messaging from '@react-native-firebase/messaging';
+import {notificationListener, requestPermission} from './utils/common';
 
 export default function App({navigation}) {
   const dispatch = useDispatch();
@@ -53,13 +56,11 @@ export default function App({navigation}) {
   };
   const [id, setID] = useState('');
   const [tugas, setTugas] = useState('');
-  const [waktu, setWaktu] = useState('');
   const [tgl, setTgl] = useState('');
   const [data, setData] = useState([]);
   const clear = () => {
     setID('');
     setTugas('');
-    setWaktu('');
     setTgl('');
   };
   const getAllTasks2 = async () => {
@@ -73,7 +74,6 @@ export default function App({navigation}) {
       dispatch({type: 'RESET_DATA_TASK'});
       dispatch({type: 'ADD_DATA_TASK', data: data});
       clear();
-      // handleBenar();
     } catch (error) {
       console.error('Terjadi kesalahan:', error);
     }
@@ -82,8 +82,7 @@ export default function App({navigation}) {
     try {
       await addTask({
         task: tugas,
-        date: tgl === undefined ? datestamp : tgl,
-        time: waktu === undefined ? timestamp : waktu,
+        date: tgl,
       });
       dispatch({type: 'RESET_DATA_TASK'});
       dispatch({type: 'ADD_DATA_TASK', data: data});
@@ -98,8 +97,7 @@ export default function App({navigation}) {
     try {
       await updateTask(id, {
         task: tugas,
-        date: tgl === undefined ? datestamp : tgl,
-        time: waktu === undefined ? timestamp : waktu,
+        date: tgl,
       });
       dispatch({type: 'RESET_DATA_TASK'});
       dispatch({type: 'ADD_DATA_TASK', data: data});
@@ -129,27 +127,25 @@ export default function App({navigation}) {
   }, [benar]);
 
   const {taskLocalData} = useSelector(state => state.task);
+  const [showPickerDate, setshowPickerDate] = useState(false);
 
-  const [time, setTime] = useState(new Date());
-  const [showPicker, setShowPicker] = useState(false);
+  useEffect(() => {
+    // requestPermission();
+    // notificationListener();
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
+    });
+    return unsubscribe;
+  }, []);
 
-  const [isDateTimePickerVisible, setDateTimePickerVisible] = useState(false);
-  const [notificationTime, setNotificationTime] = useState(new Date());
-
-  const handleDateConfirm = selectedDate => {
-    setNotificationTime(selectedDate);
-    setDateTimePickerVisible(false);
-  };
-
-  const handleDateCancel = () => {
-    setDateTimePickerVisible(false);
-  };
+  useEffect(() => {
+    setshowPickerDate(false)
+  }, [tgl]);
 
   return (
     <ScrollView style={style.container}>
       <Text style={style.text}>App</Text>
       <View
-      // style={{height: '40%'}}
       >
         <FlatList
           style={{marginBottom: 10}}
@@ -161,19 +157,17 @@ export default function App({navigation}) {
                 setID(item.id),
                 setTugas(item.task),
                 setTgl(item.date),
-                setWaktu(item.time),
               ]}
               style={{paddingHorizontal: 16, paddingVertical: 5}}>
               <Text>
-                id: {item.id}, task: {item.task}, date: {item?.date}, time:{' '}
-                {item?.time}
+                id: {item?.id}, task: {item?.task}, date: {item?.date}
               </Text>
             </TouchableOpacity>
           )}
         />
       </View>
       <Text style={style.text}>Add todolist</Text>
-      <View style={{width: '100%'}}>
+      <View style={{width: '100%', marginBottom: '-30%'}}>
         <Text style={style.text}>id</Text>
         <View style={style.textinput} onChangeText={text => setID(text)}>
           <Text>{id}</Text>
@@ -184,30 +178,19 @@ export default function App({navigation}) {
           value={tugas}
           onChangeText={text => setTugas(text)}
         />
-        <Text style={style.text}>Tgl</Text>
+        <Text style={style.text}>Tgl dan waktu</Text>
         <TouchableOpacity
           style={style.textinput}
-          onChangeText={text => setTgl(text)}>
+          onPress={() => setshowPickerDate(true)}>
           <Text>{tgl}</Text>
         </TouchableOpacity>
-        {/* {
-          showPicker && ''
-              <DateTimePicker
-            isVisible={isDateTimePickerVisible}
-            onConfirm={handleDateConfirm} // Fungsi yang akan dijalankan ketika waktu dikonfirmasi
-            onCancel={handleDateCancel}   // Fungsi yang akan dijalankan ketika pemilihan waktu dibatalkan
-            mode="datetime"
-            is24Hour={false}
-            date={notificationTime}
-            title="Pick your Notification time"
-          />
-        } */}
-        <Text style={style.text}>time</Text>
-        <TouchableOpacity
-          style={style.textinput}
-          onChangeText={text => setWaktu(text)}>
-          <Text>{waktu}</Text>
-        </TouchableOpacity>
+        <DateTimePicker
+          isVisible={showPickerDate}
+          onConfirm={text => setTgl(text.toISOString())}
+          // onCancel={}
+          mode="datetime"
+          is24Hour={true}
+        />
         <TouchableOpacity style={style.tombol} onPress={() => handleAdd()}>
           <Text style={[style.text, {textAlign: 'center'}]}>Tombol Add</Text>
         </TouchableOpacity>
@@ -224,7 +207,7 @@ export default function App({navigation}) {
       </View>
       <Calendar
         current={today}
-        style={{marginTop: '-50%', marginBottom: '80%'}}
+        style={{marginBottom: '80%'}}
         theme={{
           backgroundColor: '#ffffff',
           calendarBackground: '#ffffff',
