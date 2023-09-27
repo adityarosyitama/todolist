@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "905421255174",
+    "project_id": "aditprojt",
+    "storage_bucket": "aditprojt.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:905421255174:android:14dd9373d64624201bc987",
+        "android_client_info": {
+          "package_name": "com.todolist"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCINQH76VRn0DHL-7B-T4YD3uWr-Xx-EFI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
