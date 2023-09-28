@@ -56,4 +56,5 @@ export const notificationListener = () => {
 export const getTokendevice = async () => {
   await messaging().registerDeviceForRemoteMessages();
   const token = await messaging().getToken();
+  return token
 };

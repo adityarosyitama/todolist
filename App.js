@@ -25,7 +25,6 @@ import {Calendar} from 'react-native-calendars';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import {Alert} from 'react-native';
 import messaging from '@react-native-firebase/messaging';
-import {notificationListener, requestPermission} from './utils/common';
 
 export default function App({navigation}) {
   const dispatch = useDispatch();
@@ -130,8 +129,6 @@ export default function App({navigation}) {
   const [showPickerDate, setshowPickerDate] = useState(false);
 
   useEffect(() => {
-    // requestPermission();
-    // notificationListener();
     const unsubscribe = messaging().onMessage(async remoteMessage => {
       Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
     });
@@ -139,14 +136,13 @@ export default function App({navigation}) {
   }, []);
 
   useEffect(() => {
-    setshowPickerDate(false)
+    setshowPickerDate(false);
   }, [tgl]);
 
   return (
     <ScrollView style={style.container}>
       <Text style={style.text}>App</Text>
-      <View
-      >
+      <View>
         <FlatList
           style={{marginBottom: 10}}
           data={data}
