@@ -31,6 +31,7 @@ import {
   requestUserPermission,
 } from './firebasemessage';
 import useFirebaseNotification from './useNotifications';
+import CalendarEvents from 'react-native-calendar-events';
 
 export default function App() {
   const {data2} = useFirebaseNotification();
@@ -71,7 +72,6 @@ export default function App() {
   const getAllTasks2 = async () => {
     try {
       const tasks = await getAllTasks();
-      // console.log('firebase todolist:', tasks);
       setData(tasks);
       // await addTask({task: 'Tugas Baru3', time: timestamp});
       // await updateTask('7ciySDxnRuW4QvViv0NX', {time: timestamp});
@@ -96,6 +96,7 @@ export default function App() {
       sendNotification();
       clear();
       ToastAndroid.show('Berhasil !', ToastAndroid.SHORT);
+      // addEventToCalendar();
       handleBenar();
     } catch (error) {
       console.error('Terjadi kesalahan:', error);
@@ -178,6 +179,24 @@ export default function App() {
       console.error('Terjadi kesalahan:', error);
     }
   };
+
+  async function addEventToCalendar() {
+    try {
+      const eventDetails = {
+        title: tugas,
+        startDate: new Date(tgl), // Start date and time of the event
+        endDate: new Date(new Date(tgl).getTime() + 60 * 60 * 1000), // End date and time of the event
+        location: 'Location',
+        notes: 'Description of the task',
+        alarms: [{date: -30}], // Set a reminder 30 minutes before the event
+      };
+
+      const eventId = await CalendarEvents.saveEvent(eventDetails);
+      console.log('Event ID:', eventId);
+    } catch (error) {
+      console.error('Error adding event to calendar:', error);
+    }
+  }
 
   return (
     <ScrollView style={style.container}>
