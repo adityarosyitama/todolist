@@ -84,7 +84,6 @@ export default function App() {
       console.error('Terjadi kesalahan:', error);
     }
   };
-  const {datatok} = useFirebaseNotification();
 
   const handleAdd = async () => {
     try {
@@ -94,7 +93,7 @@ export default function App() {
       });
       dispatch({type: 'RESET_DATA_TASK'});
       dispatch({type: 'ADD_DATA_TASK', data: data});
-      // handleSendFIre();
+      sendNotification();
       clear();
       ToastAndroid.show('Berhasil !', ToastAndroid.SHORT);
       handleBenar();
@@ -130,10 +129,10 @@ export default function App() {
     }
   };
 
+  const {taskLocalData} = useSelector(state => state.task);
   useEffect(() => {
     getAllTasks2();
-    // const {taskLocalData} = useSelector(state => state.task);
-    // console.log('local storage', taskLocalData);
+    console.log('local storage', taskLocalData);
   }, [benar]);
 
   const [showPickerDate, setshowPickerDate] = useState(false);
@@ -150,6 +149,35 @@ export default function App() {
   useEffect(() => {
     setshowPickerDate(false);
   }, [tgl]);
+
+  const sendNotification = async () => {
+    try {
+      const url = 'https://serverfirebase.vercel.app/send-notification';
+
+      const data = {
+        deviceToken: data2,
+        title: 'Pemberitahuan',
+        body: tugas,
+        timestamp: tgl,
+      };
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.status === 200) {
+        console.log('Notifikasi berhasil dikirim');
+      } else {
+        console.log('Gagal mengirim notifikasi');
+      }
+    } catch (error) {
+      console.error('Terjadi kesalahan:', error);
+    }
+  };
 
   return (
     <ScrollView style={style.container}>
