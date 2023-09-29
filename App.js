@@ -25,11 +25,17 @@ import {Calendar} from 'react-native-calendars';
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import {Alert} from 'react-native';
 import messaging from '@react-native-firebase/messaging';
+import {
+  GetFCMToken,
+  notificationListener,
+  requestUserPermission,
+} from './firebasemessage';
+import useFirebaseNotification from './useNotifications';
 
-export default function App({navigation}) {
+export default function App() {
+  const {data2} = useFirebaseNotification();
+  // console.log('[adit log] token', data2);
   const dispatch = useDispatch();
-  const timestamp = moment().format('HH:mm:ss.sssZ');
-  const datestamp = moment().format('YYYY-MM-DD');
   const today = moment().format('YYYY-MM-DD');
   async function getAllTasks() {
     const querySnapshot = await getDocs(collection(db, 'todolist'));
@@ -72,11 +78,14 @@ export default function App({navigation}) {
       // await deleteTask('ID_Tugas_Yang_Akan_Dihapus');
       dispatch({type: 'RESET_DATA_TASK'});
       dispatch({type: 'ADD_DATA_TASK', data: data});
+
       clear();
     } catch (error) {
       console.error('Terjadi kesalahan:', error);
     }
   };
+  const {datatok} = useFirebaseNotification();
+
   const handleAdd = async () => {
     try {
       await addTask({
@@ -85,6 +94,7 @@ export default function App({navigation}) {
       });
       dispatch({type: 'RESET_DATA_TASK'});
       dispatch({type: 'ADD_DATA_TASK', data: data});
+      // handleSendFIre();
       clear();
       ToastAndroid.show('Berhasil !', ToastAndroid.SHORT);
       handleBenar();
@@ -122,13 +132,15 @@ export default function App({navigation}) {
 
   useEffect(() => {
     getAllTasks2();
-    console.log('local todolist:', taskLocalData);
+    // const {taskLocalData} = useSelector(state => state.task);
+    // console.log('local storage', taskLocalData);
   }, [benar]);
 
-  const {taskLocalData} = useSelector(state => state.task);
   const [showPickerDate, setshowPickerDate] = useState(false);
 
   useEffect(() => {
+    // notificationListener();
+    // requestUserPermission();
     const unsubscribe = messaging().onMessage(async remoteMessage => {
       Alert.alert('A new FCM message arrived!', JSON.stringify(remoteMessage));
     });
@@ -183,7 +195,7 @@ export default function App({navigation}) {
         <DateTimePicker
           isVisible={showPickerDate}
           onConfirm={text => setTgl(text.toISOString())}
-          // onCancel={}
+          onCancel={''}
           mode="datetime"
           is24Hour={true}
         />

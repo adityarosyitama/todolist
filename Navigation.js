@@ -7,13 +7,13 @@ import useFirebaseNotification from './useNotifications';
 
 const Stack = createNativeStackNavigator();
 const Navigation = () => {
-  const {data} = useFirebaseNotification();
-  console.log('datatoken', data);
+  const {data2} = useFirebaseNotification();
+  // console.log('[adit log] datatoken', data2);
 
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{headerShown: false}}>
-        <Stack.Screen name="App" component={App} />
+        <Stack.Screen name="App" component={App} initialParams={{data2 }}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
